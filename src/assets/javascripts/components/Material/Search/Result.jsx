@@ -219,6 +219,7 @@ export default class Result {
           /* Index fields */
           this.field("title", { boost: 10 })
           this.field("text")
+          this.field("keywords", { boost: 10000 })
           this.ref("location")
 
           /* Index documents */
