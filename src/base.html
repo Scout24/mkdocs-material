@@ -336,6 +336,10 @@
                 {% endblock %}
               {% endblock %}
 
+              <!-- Feedback button -->
+              <hr />
+              <div id="feedback"></div>
+
               <!-- Disqus integration -->
               {% block disqus %}
                 {% include "partials/integrations/disqus.html" %}
@@ -391,6 +395,11 @@
         <script src="{{ path | url }}"></script>
       {% endfor %}
     {% endblock %}
+    <script language="javascript">
+      if(window.location.pathname != "/" && !window.location.pathname.endsWith('.html')) {
+        init_feedback();
+      }
+    </script>
     <script>
       var modified_date = moment.unix({{ page.modified_date }});
       document.getElementById("last-modified-date").innerHTML = modified_date.fromNow();
