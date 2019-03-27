@@ -313,6 +313,11 @@
                 <!-- Content -->
                 {{ page.content }}
 
+                <!-- Last modified timestamp -->
+                <div style="text-align: right;font-size:0.8em">
+                  Last modified: <span id="last-modified-date"></span>
+                </div>
+
                 <!-- Source files -->
                 {% block source %}
                   {% if page and page.meta and page.meta.source %}
@@ -386,5 +391,9 @@
         <script src="{{ path | url }}"></script>
       {% endfor %}
     {% endblock %}
+    <script>
+      var modified_date = moment.unix({{ page.modified_date }});
+      document.getElementById("last-modified-date").innerHTML = modified_date.fromNow();
+    </script>
   </body>
 </html>
