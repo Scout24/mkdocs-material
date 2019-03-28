@@ -67,6 +67,7 @@
     {% endblock %}
     {% block libs %}
       <script src="{{ 'assets/javascripts/modernizr.01ccdecf.js' | url }}"></script>
+      <script src="{{ 'assets/javascripts/moment.js' | url }}"></script>
     {% endblock %}
     {% block fonts %}
       {% if font != false %}
@@ -163,6 +164,9 @@
                   <h1>{{ page.title | default(config.site_name, true)}}</h1>
                 {% endif %}
                 {{ page.content }}
+                <div style="text-align:right;font-size:.8em">
+                  Last modified: <span id="last-modified-date"></span>
+                </div>
                 {% block source %}
                   {% if page and page.meta and page.meta.source %}
                     <h2 id="__source">{{ lang.t("meta.source") }}</h2>
@@ -178,6 +182,8 @@
                   {% endif %}
                 {% endblock %}
               {% endblock %}
+              <hr>
+              <div id="feedback"></div>
               {% block disqus %}
                 {% include "partials/integrations/disqus.html" %}
               {% endblock %}
@@ -190,7 +196,7 @@
       {% endblock %}
     </div>
     {% block scripts %}
-      <script src="{{ 'assets/javascripts/application.ffe92e3c.js' | url }}"></script>
+      <script src="{{ 'assets/javascripts/application.36c70667.js' | url }}"></script>
       {% if lang.t("search.language") != "en" %}
         {% set languages = lang.t("search.language").split(",") %}
         {% if languages | length and languages[0] != "" %}
@@ -216,5 +222,10 @@
         <script src="{{ path | url }}"></script>
       {% endfor %}
     {% endblock %}
+    <script language="javascript">"/"==window.location.pathname||window.location.pathname.endsWith(".html")||init_feedback()</script>
+    <script>
+      var modified_date = moment.unix({{ page.modified_date }});
+      document.getElementById("last-modified-date").innerHTML = modified_date.fromNow();
+    </script>
   </body>
 </html>
