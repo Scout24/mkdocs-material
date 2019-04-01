@@ -327,6 +327,11 @@ export default class Result {
         const sections = items.map(item => {
           return () => {
             const section = this.docs_.get(item.ref)
+            let keywords = undefined
+            if(section.keywords){
+              keywords = section.keywords.map((keyword) => keyword.replace(match, highlight))
+            }
+
             article.appendChild(
               <a href={section.location} title={section.title}
                 class="md-search-result__link" data-md-rel="anchor"
@@ -341,6 +346,13 @@ export default class Result {
                         section.text.replace(match, highlight), 400)
                       }}
                     </p> : {}}
+                  {keywords ?
+                    <div>
+                      <hr class="md-typeset" />
+                      <p class="md-search-result__teaser">
+                        Keywords: {{ __html: keywords.join(" ") }}
+                      </p>
+                    </div> : {}}
                 </article>
               </a>
             )
