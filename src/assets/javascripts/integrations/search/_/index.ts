@@ -192,6 +192,7 @@ export class Search {
         /* Set up fields and reference */
         this.field("title", { boost: 1000 })
         this.field("text")
+        this.field("keywords", { boost: 10000 })
         this.ref("location")
 
         /* Index documents */
