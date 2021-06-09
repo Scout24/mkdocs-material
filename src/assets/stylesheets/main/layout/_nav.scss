@@ -631,8 +631,7 @@
     &--lifted {
 
       // Hide nested level 0 items and site title
-      > .md-nav__list > .md-nav__item--nested,
-      > .md-nav__title {
+      > .md-nav__list > .md-nav__item--nested {
         display: none;
       }
 
