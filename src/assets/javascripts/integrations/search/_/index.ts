@@ -54,6 +54,7 @@ export interface SearchIndexDocument {
   location: string                     /* Document location */
   title: string                        /* Document title */
   text: string                         /* Document text */
+  keywords?: string[]                  /* Document meta keywords */
 }
 
 /* ------------------------------------------------------------------------- */

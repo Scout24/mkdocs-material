@@ -57,6 +57,7 @@ export type Translation =
   | "search.result.more.one"           /* 1 more on this page */
   | "search.result.more.other"         /* # more on this page */
   | "search.result.term.missing"       /* Missing */
+  | "search.result.keywords"           /* Scout24 extension keywords */
   | "select.version.title"             /* Version selector */
 
 /**

@@ -65,6 +65,12 @@ function renderSearchDocument(
     .flat()
     .slice(0, -1)
 
+  const keywords = document.keywords != null ? document.keywords
+      .map(keyword => [{keyword}, " "])
+      .flat()
+      .slice(0, -1)
+    : "";
+
   /* Render article or section, depending on flags */
   const url = document.location
   return (
@@ -88,7 +94,13 @@ function renderSearchDocument(
             {translation("search.result.term.missing")}: {...missing}
           </p>
         }
+        {keywords && keywords.length > 0 &&
+        <p class="md-search-result__keywords">
+          {translation("search.result.keywords")}: {...keywords}
+        </p>
+        }
       </article>
+
     </a>
   )
 }
