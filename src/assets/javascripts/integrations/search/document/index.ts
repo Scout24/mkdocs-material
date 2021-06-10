@@ -64,6 +64,7 @@ export function setupSearchDocumentMap(
     /* Extract location and title */
     const location = doc.location
     const title    = doc.title
+    const keywords = doc.keywords
 
     /* Escape and cleanup text */
     const text = escapeHTML(doc.text)
@@ -78,6 +79,7 @@ export function setupSearchDocumentMap(
       if (!parents.has(parent)) {
         parent.title = doc.title
         parent.text  = text
+        parent.keywords = keywords
 
         /* Remember that we processed the article */
         parents.add(parent)
@@ -88,6 +90,7 @@ export function setupSearchDocumentMap(
           location,
           title,
           text,
+          keywords,
           parent
         })
       }
@@ -97,7 +100,8 @@ export function setupSearchDocumentMap(
       documents.set(location, {
         location,
         title,
-        text
+        text,
+        keywords
       })
     }
   }
