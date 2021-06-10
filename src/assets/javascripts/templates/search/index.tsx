@@ -90,7 +90,7 @@ function renderSearchDocument(
             {translation("search.result.term.missing")}: {...missing}
           </p>
         }
-        {keywords && keywords.length > 0 &&
+        {parent > 0 && keywords && keywords.length > 0 &&
         <p class="md-search-result__keywords">
           {translation("search.result.keywords")}: {keywords}
         </p>
