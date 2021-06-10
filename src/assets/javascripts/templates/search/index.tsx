@@ -65,11 +65,7 @@ function renderSearchDocument(
     .flat()
     .slice(0, -1)
 
-  const keywords = document.keywords != null ? document.keywords
-      .map(keyword => [{keyword}, " "])
-      .flat()
-      .slice(0, -1)
-    : "";
+  const keywords = document.keywords != null ? document.keywords : "";
 
   /* Render article or section, depending on flags */
   const url = document.location
@@ -96,7 +92,7 @@ function renderSearchDocument(
         }
         {keywords && keywords.length > 0 &&
         <p class="md-search-result__keywords">
-          {translation("search.result.keywords")}: {...keywords}
+          {translation("search.result.keywords")}: {keywords}
         </p>
         }
       </article>

@@ -54,7 +54,7 @@ export interface SearchIndexDocument {
   location: string                     /* Document location */
   title: string                        /* Document title */
   text: string                         /* Document text */
-  keywords?: string[]                  /* Document meta keywords */
+  keywords?: string                    /* Document meta keywords */
 }
 
 /* ------------------------------------------------------------------------- */
@@ -241,7 +241,7 @@ export class Search {
           .reduce<SearchResult>((results, { ref, score, matchData }) => {
             const document = this.documents.get(ref)
             if (typeof document !== "undefined") {
-              const { location, title, text, parent } = document
+              const { location, title, text, keywords, parent } = document
 
               /* Compute and analyze search query terms */
               const terms = getSearchQueryTerms(
@@ -255,6 +255,7 @@ export class Search {
                 location,
                 title: highlight(title),
                 text: highlight(text),
+                keywords: keywords ? highlight(keywords): undefined,
                 score: score * (1 + boost),
                 terms
               })
