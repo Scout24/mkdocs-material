@@ -148,6 +148,9 @@
 
     <!-- Custom front matter -->
     {% block extrahead %}{% endblock %}
+    {% if page and page.meta and page.meta.hide_toc %}
+      <link rel="stylesheet" href="{{ 'stylesheets/hide_toc.css' | url }}">
+    {% endif %}
   </head>
 
   <!-- Set text direction and color palette, if defined -->
@@ -267,7 +270,7 @@
             {% endif %}
 
             <!-- Table of contents -->
-            {% if page.toc and not "toc.integrate" in features %}
+            {% if page.toc and not "toc.integrate" in features and (not page.meta or not page.meta.hide_toc) %}
               {% if page and page.meta and page.meta.hide %}
                 {% set hidden = "hidden" if "toc" in page.meta.hide %}
               {% endif %}
@@ -310,7 +313,11 @@
                   as the main headline.
                 -->
                 {% if not "\x3ch1" in page.content %}
-                  <h1>{{ page.title | d(config.site_name, true)}}</h1>
+                  {% if page.meta.hide_title %}
+                    <h1 style=visibility:hidden>{{ page.title | d(config.site_name, true)}}</h1>
+                  {% else%}
+                    <h1>{{ page.title | d(config.site_name, true)}}</h1>
+                  {% endif %}
                 {% endif %}
 
                 <!-- Markdown content -->
@@ -415,9 +422,11 @@
         init_feedback();
       }
     </script>
+    {% if not page.meta or not page.meta.generatedBy %}
     <script>
       var modified_date = moment.unix({{ page.modified_date }});
       document.getElementById("last-modified-date").innerHTML = modified_date.fromNow();
     </script>
+    {% endif %}
   </body>
 </html>
