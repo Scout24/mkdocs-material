@@ -20,6 +20,9 @@
 /// DEALINGS
 ////
 
+@use "sass:color";
+@use "sass:list";
+
 // ----------------------------------------------------------------------------
 // Variables
 // ----------------------------------------------------------------------------
@@ -27,14 +30,14 @@
 /// Admonition flavours
 $admonitions: (
   note:                       pencil $clr-blue-a200,
-  abstract summary tldr:      text-subject $clr-light-blue-a400,
+  abstract summary tldr:      clipboard-text $clr-light-blue-a400,
   info todo:                  information $clr-cyan-a700,
   tip hint important:         fire $clr-teal-a700,
-  success check done:         check-circle $clr-green-a700,
+  success check done:         check-bold $clr-green-a700,
   question help faq:          help-circle $clr-light-green-a700,
   warning caution attention:  alert $clr-orange-a400,
-  failure fail missing:       close-circle $clr-red-a200,
-  danger error:               flash-circle $clr-red-a400,
+  failure fail missing:       close-thick $clr-red-a200,
+  danger error:               lightning-bolt $clr-red-a400,
   bug:                        bug $clr-pink-a400,
   example:                    format-list-numbered $clr-deep-purple-a200,
   quote cite:                 format-quote-close $clr-grey
@@ -116,7 +119,7 @@ $admonitions: (
     margin: 0 px2rem(-12px) 0 px2rem(-16px);
     padding: px2rem(8px) px2rem(12px) px2rem(8px) px2rem(40px);
     font-weight: 700;
-    background-color: transparentize($clr-blue-a200, 0.9);
+    background-color: color.adjust($clr-blue-a200, $alpha: -0.9);
     border-left: px2rem(4px) solid $clr-blue-a200;
 
     // Adjust for right-to-left languages
@@ -150,12 +153,6 @@ $admonitions: (
         left: initial;
       }
     }
-
-    // Adjust spacing on last tabbed block container child - if the tabbed
-    // block container is the sole child, it looks better to omit the margin
-    + .tabbed-set:last-child {
-      margin-top: 0;
-    }
   }
 }
 
@@ -164,8 +161,8 @@ $admonitions: (
 // ----------------------------------------------------------------------------
 
 @each $names, $props in $admonitions {
-  $name: nth($names, 1);
-  $tint: nth($props, 2);
+  $name: list.nth($names, 1);
+  $tint: list.nth($props, 2);
 
   // Admonition flavour
   .md-typeset .admonition.#{$name} {
@@ -174,7 +171,7 @@ $admonitions: (
 
   // Admonition flavour title
   .md-typeset .#{$name} > .admonition-title {
-    background-color: transparentize($tint, 0.9);
+    background-color: color.adjust($tint, $alpha: -0.9);
     border-color: $tint;
 
     // Admonition icon

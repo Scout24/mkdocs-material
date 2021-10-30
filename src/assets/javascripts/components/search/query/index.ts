@@ -31,8 +31,12 @@ import {
   delay,
   distinctUntilChanged,
   distinctUntilKeyChanged,
+  filter,
   finalize,
   map,
+  shareReplay,
+  startWith,
+  take,
   takeLast,
   takeUntil,
   tap
@@ -43,6 +47,7 @@ import {
   setSearchQueryPlaceholder
 } from "~/actions"
 import {
+  getLocation,
   setElementFocus,
   setToggle,
   watchElementFocus
@@ -51,7 +56,8 @@ import {
   SearchMessageType,
   SearchQueryMessage,
   SearchWorker,
-  defaultTransform
+  defaultTransform,
+  isSearchReadyMessage
 } from "~/integrations"
 
 import { Component } from "../../_"
@@ -79,29 +85,52 @@ export interface SearchQuery {
  * is delayed by `1ms` so the input's empty state is allowed to propagate.
  *
  * @param el - Search query element
+ * @param worker - Search worker
  *
  * @returns Search query observable
  */
 export function watchSearchQuery(
-  el: HTMLInputElement
+  el: HTMLInputElement, { rx$ }: SearchWorker
 ): Observable<SearchQuery> {
   const fn = __search?.transform || defaultTransform
+
+  /* Immediately show search dialog */
+  const { searchParams } = getLocation()
+  if (searchParams.has("q"))
+    setToggle("search", true)
+
+  /* Intercept query parameter (deep link) */
+  const param$ = rx$
+    .pipe(
+      filter(isSearchReadyMessage),
+      take(1),
+      map(() => searchParams.get("q") || "")
+    )
+
+  /* Set query from parameter */
+  param$.subscribe(value => { // TODO: not ideal - find a better way
+    if (value)
+      el.value = value
+  })
 
   /* Intercept focus and input events */
   const focus$ = watchElementFocus(el)
   const value$ = merge(
     fromEvent(el, "keyup"),
-    fromEvent(el, "focus").pipe(delay(1))
+    fromEvent(el, "focus").pipe(delay(1)),
+    param$
   )
     .pipe(
       map(() => fn(el.value)),
-      distinctUntilChanged()
+      startWith(""),
+      distinctUntilChanged(),
     )
 
   /* Combine into single observable */
   return combineLatest([value$, focus$])
     .pipe(
-      map(([value, focus]) => ({ value, focus }))
+      map(([value, focus]) => ({ value, focus })),
+      shareReplay(1)
     )
 }
 
@@ -114,7 +143,7 @@ export function watchSearchQuery(
  * @returns Search query component observable
  */
 export function mountSearchQuery(
-  el: HTMLInputElement, { tx$ }: SearchWorker
+  el: HTMLInputElement, { tx$, rx$ }: SearchWorker
 ): Observable<Component<SearchQuery, HTMLInputElement>> {
   const internal$ = new Subject<SearchQuery>()
 
@@ -151,9 +180,9 @@ export function mountSearchQuery(
       .subscribe(() => setElementFocus(el))
 
   /* Create and return component */
-  return watchSearchQuery(el)
+  return watchSearchQuery(el, { tx$, rx$ })
     .pipe(
-      tap(internal$),
+      tap(state => internal$.next(state)),
       finalize(() => internal$.complete()),
       map(state => ({ ref: el, ...state }))
     )

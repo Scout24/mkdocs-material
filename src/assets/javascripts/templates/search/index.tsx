@@ -20,11 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-import { translation } from "~/_"
+import { feature, translation } from "~/_"
 import {
   SearchDocument,
   SearchMetadata,
-  SearchResult
+  SearchResultItem
 } from "~/integrations/search"
 import { h, truncate } from "~/utilities"
 
@@ -67,10 +67,17 @@ function renderSearchDocument(
 
   const keywords = document.keywords != null ? document.keywords : "";
 
+  /* Assemble query string for highlighting */
+  const url = new URL(document.location)
+  if (feature("search.highlight"))
+    url.searchParams.set("h", Object.entries(document.terms)
+      .filter(([, match]) => match)
+      .reduce((highlight, [value]) => `${highlight} ${value}`.trim(), "")
+    )
+
   /* Render article or section, depending on flags */
-  const url = document.location
   return (
-    <a href={url} class="md-search-result__link" tabIndex={-1}>
+    <a href={`${url}`} class="md-search-result__link" tabIndex={-1}>
       <article
         class={["md-search-result__article", ...parent
           ? ["md-search-result__article--document"]
@@ -91,12 +98,11 @@ function renderSearchDocument(
           </p>
         }
         {parent > 0 && keywords && keywords.length > 0 &&
-        <p class="md-search-result__keywords">
-          {translation("search.result.keywords")}: {keywords}
-        </p>
+          <p class="md-search-result__keywords">
+            {translation("search.result.keywords")}: {keywords}
+          </p>
         }
       </article>
-
     </a>
   )
 }
@@ -112,8 +118,8 @@ function renderSearchDocument(
  *
  * @returns Element
  */
-export function renderSearchResult(
-  result: SearchResult
+export function renderSearchResultItem(
+  result: SearchResultItem
 ): HTMLElement {
   const threshold = result[0].score
   const docs = [...result]

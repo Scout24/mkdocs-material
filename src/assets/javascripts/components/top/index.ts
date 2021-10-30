@@ -33,13 +33,22 @@ import {
   finalize,
   map,
   observeOn,
-  tap
+  tap,
+  withLatestFrom
 } from "rxjs/operators"
 
-import { resetBackToTopState, setBackToTopState } from "~/actions"
-import { Viewport } from "~/browser"
+import {
+  resetBackToTopOffset,
+  resetBackToTopState,
+  resetFocusable,
+  setBackToTopOffset,
+  setBackToTopState,
+  setFocusable
+} from "~/actions"
+import { Viewport, setElementFocus } from "~/browser"
 
 import { Component } from "../_"
+import { Header } from "../header"
 import { Main } from "../main"
 
 /* ----------------------------------------------------------------------------
@@ -62,6 +71,7 @@ export interface BackToTop {
  */
 interface WatchOptions {
   viewport$: Observable<Viewport>      /* Viewport observable */
+  header$: Observable<Header>          /* Header observable */
   main$: Observable<Main>              /* Main area observable */
 }
 
@@ -70,6 +80,7 @@ interface WatchOptions {
  */
 interface MountOptions {
   viewport$: Observable<Viewport>      /* Viewport observable */
+  header$: Observable<Header>          /* Header observable */
   main$: Observable<Main>              /* Main area observable */
 }
 
@@ -94,7 +105,7 @@ export function watchBackToTop(
     .pipe(
       map(({ offset: { y } }) => y),
       bufferCount(2, 1),
-      map(([a, b]) => a > b),
+      map(([a, b]) => a > b && b),
       distinctUntilChanged()
     )
 
@@ -127,33 +138,45 @@ export function watchBackToTop(
  * @returns Back-to-top component observable
  */
 export function mountBackToTop(
-  el: HTMLElement, options: MountOptions
+  el: HTMLElement, { viewport$, header$, main$ }: MountOptions
 ): Observable<Component<BackToTop>> {
   const internal$ = new Subject<BackToTop>()
   internal$
     .pipe(
-      observeOn(animationFrameScheduler)
+      observeOn(animationFrameScheduler),
+      withLatestFrom(header$
+        .pipe(
+          distinctUntilKeyChanged("height")
+        )
+      )
     )
       .subscribe({
 
         /* Update state */
-        next({ hidden }) {
-          if (hidden)
+        next([{ hidden }, { height }]) {
+          setBackToTopOffset(el, height + 16)
+          if (hidden) {
             setBackToTopState(el, "hidden")
-          else
+            setElementFocus(el, false)
+            setFocusable(el, -1)
+          } else {
             resetBackToTopState(el)
+            resetFocusable(el)
+          }
         },
 
         /* Reset on complete */
         complete() {
+          resetBackToTopOffset(el)
           resetBackToTopState(el)
+          resetFocusable(el)
         }
       })
 
   /* Create and return component */
-  return watchBackToTop(el, options)
+  return watchBackToTop(el, { viewport$, header$, main$ })
     .pipe(
-      tap(internal$),
+      tap(state => internal$.next(state)),
       finalize(() => internal$.complete()),
       map(state => ({ ref: el, ...state }))
     )

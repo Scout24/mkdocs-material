@@ -23,10 +23,14 @@
 import { ObservableInput, Subject, from } from "rxjs"
 import { map, share } from "rxjs/operators"
 
-import { configuration, translation } from "~/_"
+import { configuration, feature, translation } from "~/_"
 import { WorkerHandler, watchWorker } from "~/browser"
 
-import { SearchIndex, SearchIndexPipeline } from "../../_"
+import { SearchIndex } from "../../_"
+import {
+  SearchOptions,
+  SearchPipeline
+} from "../../options"
 import {
   SearchMessage,
   SearchMessageType,
@@ -71,10 +75,16 @@ function setupSearchIndex(
   /* Set pipeline from translation */
   const pipeline = translation("search.config.pipeline")
     .split(/\s*,\s*/)
-    .filter(Boolean) as SearchIndexPipeline
+    .filter(Boolean) as SearchPipeline
+
+  /* Determine search options */
+  const options: SearchOptions = {
+    pipeline,
+    suggestions: feature("search.suggest")
+  }
 
   /* Return search index after defaulting */
-  return { config, docs, index, pipeline }
+  return { config, docs, index, options }
 }
 
 /* ----------------------------------------------------------------------------
@@ -105,9 +115,9 @@ export function setupSearchWorker(
     .pipe(
       map(message => {
         if (isSearchResultMessage(message)) {
-          for (const result of message.data)
+          for (const result of message.data.items)
             for (const document of result)
-              document.location = `${config.base}/${document.location}`
+              document.location = `${new URL(document.location, config.base)}`
         }
         return message
       }),
@@ -117,10 +127,10 @@ export function setupSearchWorker(
   /* Set up search index */
   from(index)
     .pipe(
-      map<SearchIndex, SearchSetupMessage>(data => ({
+      map(data => ({
         type: SearchMessageType.SETUP,
         data: setupSearchIndex(data)
-      }))
+      } as SearchSetupMessage))
     )
       .subscribe(tx$.next.bind(tx$))
 

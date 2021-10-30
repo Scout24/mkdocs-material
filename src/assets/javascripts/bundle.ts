@@ -55,6 +55,7 @@ import {
   mountHeaderTitle,
   mountPalette,
   mountSearch,
+  mountSearchHiglight,
   mountSidebar,
   mountSource,
   mountTableOfContents,
@@ -98,7 +99,7 @@ const print$    = watchPrint()
 const config = configuration()
 const index$ = document.forms.namedItem("search")
   ? __search?.index || requestJSON<SearchIndex>(
-    `${config.base}/search/search_index.json`
+    new URL("search/search_index.json", config.base)
   )
   : NEVER
 
@@ -195,6 +196,13 @@ const content$ = defer(() => merge(
   ...getComponentElements("content")
     .map(el => mountContent(el, { target$, viewport$, print$ })),
 
+  /* Search highlighting */
+  ...getComponentElements("content")
+    .map(el => feature("search.highlight")
+      ? mountSearchHiglight(el, { index$, location$ })
+      : NEVER
+    ),
+
   /* Header title */
   ...getComponentElements("header-title")
     .map(el => mountHeaderTitle(el, { viewport$, header$ })),
@@ -216,7 +224,7 @@ const content$ = defer(() => merge(
 
   /* Back-to-top button */
   ...getComponentElements("top")
-    .map(el => mountBackToTop(el, { viewport$, main$ }))
+    .map(el => mountBackToTop(el, { viewport$, header$, main$ }))
 ))
 
 /* Set up component observables */
