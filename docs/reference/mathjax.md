@@ -60,7 +60,7 @@ JavaScript][8]:
     ``` yaml
     extra_javascript:
       - javascripts/config.js
-      - https://polyfill.io/v3/polyfill.min.js?features=es6
+      - https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js
       - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
     ```
 
@@ -76,7 +76,7 @@ information._
     MkDocs with _MathJax 2_, which doesn't exhibit this behavior. It's therefore
     highly recommended to switch to _MathJax 3_.
 
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script>
   window.MathJax = {
