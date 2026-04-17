@@ -13,6 +13,11 @@
       {% elif config.site_description %}
         <meta name="description" content="{{ config.site_description }}">
       {% endif %}
+      {% if page.meta and page.meta.keywords %}
+        <meta name="keywords" content="{{ page.meta.keywords }}">
+      {% elif config.site_keywords %}
+        <meta name="keywords" content="{{ config.site_keywords }}">
+      {% endif %}
       {% if page.meta and page.meta.author %}
         <meta name="author" content="{{ page.meta.author }}">
       {% elif config.site_author %}
@@ -81,6 +86,9 @@
       {% include "partials/integrations/analytics.html" %}
     {% endblock %}
     {% block extrahead %}{% endblock %}
+    {% if page.meta and page.meta.hide_toc %}
+      <link rel="stylesheet" href="{{ 'stylesheets/hide_toc.css' | url }}">
+    {% endif %}
   </head>
   {% set direction = config.theme.direction or lang.t("direction") %}
   {% if config.theme.palette %}
@@ -164,7 +172,7 @@
                 </div>
               </div>
             {% endif %}
-            {% if "toc.integrate" not in features %}
+            {% if "toc.integrate" not in features and (not page.meta or not page.meta.hide_toc) %}
               {% if page.meta and page.meta.hide %}
                 {% set hidden = "hidden" if "toc" in page.meta.hide %}
               {% endif %}
@@ -254,6 +262,20 @@
       {% for script in config.extra_javascript %}
         {{ script | script_tag }}
       {% endfor %}
+      <script>
+        if (typeof init_feedback === "function" &&
+            window.location.pathname !== "/" &&
+            !window.location.pathname.endsWith(".html")) {
+          init_feedback()
+        }
+        var lastModified = document.getElementById("last-modified-date")
+        if (lastModified && typeof moment === "function") {
+          var timestamp = Number(lastModified.textContent)
+          if (!Number.isNaN(timestamp) && timestamp > 0) {
+            lastModified.textContent = moment.unix(timestamp).fromNow()
+          }
+        }
+      </script>
     {% endblock %}
   </body>
 </html>

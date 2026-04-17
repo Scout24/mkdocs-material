@@ -225,12 +225,30 @@ class SearchIndex:
         }
 
         # Set document tags
-        tags = page.meta.get("tags")
-        if isinstance(tags, list):
-            entry["tags"] = []
-            for name in tags:
+        tags = []
+
+        page_tags = page.meta.get("tags")
+        if isinstance(page_tags, list):
+            for name in page_tags:
                 if name and isinstance(name, (str, int, float, bool)):
-                    entry["tags"].append(str(name))
+                    tags.append(str(name))
+
+        # Compatibility with a historic fork: front matter "keywords"
+        # should remain searchable on modern Material search.
+        keywords = page.meta.get("keywords")
+        if isinstance(keywords, str):
+            values = keywords.split(",") if "," in keywords else keywords.split()
+            for keyword in values:
+                keyword = keyword.strip()
+                if keyword:
+                    tags.append(keyword)
+        elif isinstance(keywords, list):
+            for keyword in keywords:
+                if keyword and isinstance(keyword, (str, int, float, bool)):
+                    tags.append(str(keyword))
+
+        if tags:
+            entry["tags"] = list(dict.fromkeys(tags))
 
         # Set document boost
         search = page.meta.get("search") or {}

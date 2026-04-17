@@ -38,6 +38,13 @@
         <meta name="description" content="{{ config.site_description }}" />
       {% endif %}
 
+      <!-- Page keywords -->
+      {% if page.meta and page.meta.keywords %}
+        <meta name="keywords" content="{{ page.meta.keywords }}" />
+      {% elif config.site_keywords %}
+        <meta name="keywords" content="{{ config.site_keywords }}" />
+      {% endif %}
+
       <!-- Page author -->
       {% if page.meta and page.meta.author %}
         <meta name="author" content="{{ page.meta.author }}" />
@@ -171,6 +178,9 @@
 
     <!-- Custom front matter -->
     {% block extrahead %}{% endblock %}
+    {% if page.meta and page.meta.hide_toc %}
+      <link rel="stylesheet" href="{{ 'stylesheets/hide_toc.css' | url }}" />
+    {% endif %}
   </head>
 
   <!-- Set text direction and color palette, if defined -->
@@ -314,7 +324,7 @@
             {% endif %}
 
             <!-- Table of contents -->
-            {% if "toc.integrate" not in features %}
+            {% if "toc.integrate" not in features and (not page.meta or not page.meta.hide_toc) %}
               {% if page.meta and page.meta.hide %}
                 {% set hidden = "hidden" if "toc" in page.meta.hide %}
               {% endif %}
@@ -441,6 +451,22 @@
       {% for script in config.extra_javascript %}
         {{ script | script_tag }}
       {% endfor %}
+      <script>
+        if (
+          typeof init_feedback === "function" &&
+          window.location.pathname !== "/" &&
+          !window.location.pathname.endsWith(".html")
+        ) {
+          init_feedback()
+        }
+        const lastModified = document.getElementById("last-modified-date")
+        if (lastModified && typeof moment === "function") {
+          const timestamp = Number(lastModified.textContent)
+          if (!Number.isNaN(timestamp) && timestamp > 0) {
+            lastModified.textContent = moment.unix(timestamp).fromNow()
+          }
+        }
+      </script>
     {% endblock %}
   </body>
 </html>
